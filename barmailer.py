@@ -56,13 +56,13 @@ def process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_lis
         return
     
     # Create the HTML <img> tag with the generated QR code base64 data
-    qr_code_html = f'<img src="data:image/png;base64,{qr_code_data}" alt="QR Code"/>'
+    qr_code_html = f'<img src="data:image/png;base64,{qr_code_data}" alt="QR Code" style="width:150px;height:150px;"/>'  # Styling added for size
 
     # Replace the {{QR_CODE}} placeholder in the body with the actual QR code
     body_with_qr = body.replace("{{QR_CODE}}", qr_code_html)
 
     # Debugging: Check the body after QR code replacement
-    print("Email Body with QR code:")
+    print("Email Body with QR code: ")
     print(body_with_qr)  # This helps to visually inspect the final HTML email body
 
     # Process each email
