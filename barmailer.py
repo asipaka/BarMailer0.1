@@ -67,11 +67,13 @@ def process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_lis
 
 # Main function
 def main():
-    while True:
-        display_info()
 
-        smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body = manage_session()
+       if result is None:
+        print("No Previous Session Found... Starting New Session")
+        return
 
+        smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body = result
+  
         email_list_file = input("Email list file (CSV/TXT): ").strip()
         email_list = load_email_list(email_list_file)
 
@@ -92,7 +94,7 @@ def main():
         another = input("\nDo you want to run another campaign? (y/n): ").strip().lower()
         if another != 'y':
             print("Exiting BarMailer0.1 Goodbye!")
-            break
+            print("\n")
 
 if __name__ == "__main__":
     main()
