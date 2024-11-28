@@ -1,0 +1,9 @@
+smtplib
+qrcode
+pillow
+requests
+email
+csv
+io
+re
+base64
