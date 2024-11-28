@@ -105,10 +105,11 @@ def main():
     process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_list, subject, body, url)
 
     # Check if the user wants to run another campaign
-    another = input("\nDo you want to run another campaign? (y/n): \n").strip().lower()
+    another = input("\nDo you want to run another campaign? (y/n): ").strip().lower()
+    print("*************************************************\n")
     if another != 'y':
-        print("Exiting BarMailer0.1 Goodbye!\n")
-        print("\n")
+        print("Exiting BarMailer0.1 Goodbye!")
+        print("*************************************************\n")
 
 # Run the main function when the script is executed
 if __name__ == "__main__":
