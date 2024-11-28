@@ -1,4 +1,3 @@
-smtplib
 qrcode
 pillow
 requests
