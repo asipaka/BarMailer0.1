@@ -4,9 +4,13 @@ BarMailer is a QR-enabled email automation tool designed for streamlined bulk em
 **Features**
 
 **QR Code Embedding**: Automatically embed personalized QR codes into emails for added interactivity.
+
 **Customizable Templates**: Use a default email template or import your own HTML templates.
+
 **Session Continuity**: Save and reuse configurations from previous campaigns.
+
 **Simple Workflow**: Input settings once and focus on your campaign, without repeated setups.
+
 **Error Handling**: Alerts for any misconfigurations or delivery issues.
 
 **Installation**
@@ -19,14 +23,18 @@ Clone or download this repository.
 
 **Installation Steps**
 Navigate to the project folder:
+
 **bash**
 cd BarMailer
 Install the tool using the setup.py script:
+
 **bash**
 python setup.py install
 This will install all dependencies and set up the tool for use.
+
 **Running BarMailer**
 After installation, you can start the tool directly from your terminal using the command:
+
 **bash**
 bar-mailer
 
@@ -66,6 +74,7 @@ requests
 **FAQ**
 **1. How do I prepare the recipient email list?**
 Create a plain .txt file with one email address per line.
+
 **Example:**
 example1@gmail.com  
 example2@gmail.com  
