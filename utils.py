@@ -33,41 +33,53 @@ def manage_session():
     """Manage the session for new or continued campaign."""
     session_file = 'previous_config.txt'
 
-    # If session file exists, prompt user for continuation
+    # Check if there's a previous configuration session
     if os.path.exists(session_file):
         with open(session_file, 'r') as f:
             previous_config = f.read().splitlines()
-        
+
+        # Show the previous configuration to the user
         print("\n++++++ Previous Configuration ++++++")
         print("\n".join(previous_config))
 
-        # Ask if the user wants to use the existing session
-        continue_session = input("\nDo you want to use the previous configuration? (y/n): ").strip().lower()
-        
-        if continue_session == 'y':
-            print("\n++++++ Continuing with Previous Config ++++++\n")
-            # Return previous session data
-            return tuple(previous_config[:7])  # Ensure only the first 7 fields are returned
-        else:
-            print("\n++++++ Starting a New Session ++++++\n")
-            # Fall through to the new session logic
-    else:
-        print("\nNo previous configuration found. Starting a new session...\n")
+        # Ask if the user wants to continue with the previous session
+        continue_session = input("\nDo you want to use the previous configuration (y/n)?: ").strip().lower()
 
-    # New session setup
-    smtp_host = input(f"SMTP Host (default: {DEFAULT_SMTP_HOST}): ").strip() or DEFAULT_SMTP_HOST
-    smtp_user = input(f"SMTP User (default: {DEFAULT_SMTP_USER}): ").strip() or DEFAULT_SMTP_USER
-    smtp_pass = input(f"SMTP Password (default: {DEFAULT_SMTP_PASS}): ").strip() or DEFAULT_SMTP_PASS
-    smtp_sender_email = input(f"SMTP Sender Email (default: {DEFAULT_SENDER_EMAIL}): ").strip() or DEFAULT_SENDER_EMAIL
+        if continue_session == 'y':
+            print("\n++++++++ Continuing with Previous Config ++++++++\n")
+            try:
+                smtp_host = previous_config[0]
+                smtp_user = previous_config[1]
+                smtp_pass = previous_config[2]
+                smtp_sender_email = previous_config[3]
+                subject = previous_config[4]
+                url = previous_config[5]
+                body = previous_config[6]
+                return smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body
+            except IndexError:
+                print("Error: Configuration file is corrupted or incomplete.")
+                print("Starting a new session...")
+        else:
+            print("\n++++++++ Starting a New Session ++++++++\n")
+    else:
+        print("\n------------ No Previous Sessions ------------\n")
+
+    # Prompt user for new session details
+    smtp_host = input(f"SMTP Host (default: smtp.mailtrap.io): ").strip() or "smtp.mailtrap.io"
+    smtp_user = input(f"SMTP User (default: your_mailtrap_user): ").strip() or "your_mailtrap_user"
+    smtp_pass = input(f"SMTP Password (default: your_mailtrap_password): ").strip() or "your_mailtrap_password"
+    smtp_sender_email = input(f"SMTP Sender Email (default: test@bcm.com): ").strip() or "test@bcm.com"
     subject = input("Email Subject: ").strip()
     url = input("Phishing URL: ").strip()
 
-    # Ask for email body template
-    use_default = input("\nDo you want to use the default email template for testing? (y/n): ").strip().lower()
+    print("\n")
+
+    use_default = input("Do you want to use the default email template for testing? (y/n): ").strip().lower()
     if use_default == 'y':
         body = basic_html_body()
     elif use_default == 'n':
-        body = import_custom_template()  # Custom template import
+        filepath = input("Enter the path to your custom template file: ")
+        body = import_custom_template(filepath)  # Pass the filepath argument
     else:
         print("Invalid input. Exiting the program.")
         sys.exit(1)
@@ -106,12 +118,30 @@ def fetch_logo(path):
 def is_valid_smtp_host(host):
     return '.' in host and len(host) > 5  # Basic validation for hostname structure
 
+# **New Function**: Generate email body by replacing placeholders with actual data (username, QR code, URL)
+def generate_email_body(username, qr_code_url, verification_url):
+    try:
+        # You can either use a hardcoded template or dynamically load it from a file
+        email_body = basic_html_body()  # You can replace this with import_custom_template if needed
+        
+        # Replace placeholders with actual dynamic data
+        email_body = email_body.replace('{{USERNAME}}', username)
+        email_body = email_body.replace('{{QR_CODE}}', qr_code_url)
+        email_body = email_body.replace('{{URL}}', verification_url)
+
+        return email_body
+    except Exception as e:
+        print(f"Error in generating email body: {e}")
+        return None
+
 # Basic HTML body for email
 def basic_html_body():
     return """<html>
         <body>
             <h1>Action Required</h1>
-            <p>Please click the link below to verify your details:</p>
+            <p>Hello {{USERNAME}},</p>
+            <p>Please scan the QR code or click the link below to verify your details:</p>
+            <p><img src="data:image/png;base64,{{QR_CODE}}" alt="QR Code"></p>
             <a href="{{URL}}">Verify Now</a>
         </body>
     </html>"""
