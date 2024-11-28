@@ -33,62 +33,51 @@ def manage_session():
     """Manage the session for new or continued campaign."""
     session_file = 'previous_config.txt'
 
-    # Check if there's a previous configuration session
+    # If session file exists, prompt user for continuation
     if os.path.exists(session_file):
         with open(session_file, 'r') as f:
             previous_config = f.read().splitlines()
         
-        # Show the previous configuration to the user
         print("\n++++++ Previous Configuration ++++++")
         print("\n".join(previous_config))
 
-        # Ask if the user wants to continue with the previous session
-        continue_session = input("\nDo you want to use the previous configuration (y/n)?: ").strip().lower()
+        # Ask if the user wants to use the existing session
+        continue_session = input("\nDo you want to use the previous configuration? (y/n): ").strip().lower()
         
         if continue_session == 'y':
-            print("\n++++++++ Continuing with previous Config ++++++++\n")
-            smtp_host = previous_config[0]
-            smtp_user = previous_config[1]
-            smtp_pass = previous_config[2]
-            smtp_sender_email = previous_config[3]
-            subject = previous_config[4]
-            url = previous_config[5]
-            body = previous_config[6]
+            print("\n++++++ Continuing with Previous Config ++++++\n")
+            # Return previous session data
+            return tuple(previous_config[:7])  # Ensure only the first 7 fields are returned
         else:
-            print("\n++++++++ Starting a new session ++++++++\n")
-            smtp_host = input(f"SMTP Host (default: {DEFAULT_SMTP_HOST}): ").strip() or DEFAULT_SMTP_HOST
-            smtp_user = input(f"SMTP User (default: {DEFAULT_SMTP_USER}): ").strip() or DEFAULT_SMTP_USER
-            smtp_pass = input(f"SMTP Password (default: {DEFAULT_SMTP_PASS}): ").strip() or DEFAULT_SMTP_PASS
-            smtp_sender_email = input(f"SMTP Sender Email(default {DEFAULT_SENDER_EMAIL}): ").strip() or DEFAULT_SENDER_EMAIL
-            subject = input("Email Subject: ").strip()
-            url = input("Phishing URL: ").strip()
+            print("\n++++++ Starting a New Session ++++++\n")
+            # Fall through to the new session logic
+    else:
+        print("\nNo previous configuration found. Starting a new session...\n")
 
-            print("\n")
+    # New session setup
+    smtp_host = input(f"SMTP Host (default: {DEFAULT_SMTP_HOST}): ").strip() or DEFAULT_SMTP_HOST
+    smtp_user = input(f"SMTP User (default: {DEFAULT_SMTP_USER}): ").strip() or DEFAULT_SMTP_USER
+    smtp_pass = input(f"SMTP Password (default: {DEFAULT_SMTP_PASS}): ").strip() or DEFAULT_SMTP_PASS
+    smtp_sender_email = input(f"SMTP Sender Email (default: {DEFAULT_SENDER_EMAIL}): ").strip() or DEFAULT_SENDER_EMAIL
+    subject = input("Email Subject: ").strip()
+    url = input("Phishing URL: ").strip()
 
-            print("++++++++++++++++++++++++++++++++++++++++++++++\n")
+    # Ask for email body template
+    use_default = input("\nDo you want to use the default email template for testing? (y/n): ").strip().lower()
+    if use_default == 'y':
+        body = basic_html_body()
+    elif use_default == 'n':
+        body = import_custom_template()  # Custom template import
+    else:
+        print("Invalid input. Exiting the program.")
+        sys.exit(1)
 
-            use_default = input("\nDo you want to use the default email template for testing? (y/n): ").strip().lower()
-            
-            if use_default == 'y':
-                body = basic_html_body()
-            elif use_default == 'n':
-                body = import_custom_template()  # Import custom template
-            else:
-                print("Invalid input. Exiting the program.")
-                sys.exit(1)
-            
-            # Save the configuration to the session file for future use
-            with open(session_file, 'w') as f:
-                f.write(f"{smtp_host}\n{smtp_user}\n{smtp_pass}\n{smtp_sender_email}\n{subject}\n{url}\n{body}")
-        
-        return smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body
-   
-        # Save the configuration to the session file for future use
-        with open(session_file, 'w') as f:
-            f.write(f"{smtp_host}\n{smtp_user}\n{smtp_pass}\n{smtp_sender_email}\n{subject}\n{url}\n{body}")
-        
-        return smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body
+    # Save the new configuration to the session file
+    with open(session_file, 'w') as f:
+        f.write(f"{smtp_host}\n{smtp_user}\n{smtp_pass}\n{smtp_sender_email}\n{subject}\n{url}\n{body}")
 
+    print("\n++++++ New Session Config Saved ++++++\n")
+    return smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body
 
 # Generate QR code in base64 format
 def generate_qr_code_base64(data):
