@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "bar-mailer=src.bar_mailer:main",  # Entry point for your main script
+            "barmailer=src.barmailer:main",  # Entry point for your main script
         ],
     },
     author="cr1ck3ht",
