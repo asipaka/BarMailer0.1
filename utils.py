@@ -5,7 +5,6 @@ import qrcode
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import io
-import os
 import sys
 
 DEFAULT_SMTP_HOST = "smtp.mailtrap.io"
