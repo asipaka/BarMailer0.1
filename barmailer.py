@@ -67,6 +67,7 @@ def process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_lis
 
 # Main function
 def main():
+        display_info()
         result = manage_session()
         if result is None:
             print("------------No Previous sessions------------\n")
