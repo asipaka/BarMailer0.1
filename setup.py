@@ -3,8 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="BarMailer",
     version="0.1.0",
-    packages=find_packages(where='src'),  # Find packages inside the src directory
-    package_dir={'': 'src'},  # Specifies that the root package is in the src directory
+    packages=find_packages(),
     include_package_data=True,
     install_requires=[
         "qrcode",  # For generating QR codes
@@ -13,7 +12,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "barmailer=src.barmailer:main",  # Entry point for your main script
+            "barmailer=barmailer:main",  # Entry point for your main script
         ],
     },
     author="cr1ck3ht",
