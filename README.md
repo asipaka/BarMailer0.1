@@ -2,6 +2,7 @@
 BarMailer is a QR-enabled email automation tool designed for streamlined bulk email campaigns. Whether you're sending newsletters, marketing emails, or custom messages, BarMailer ensures simplicity and functionality with built-in QR code generation.
 
 **Features**
+
 **QR Code Embedding**: Automatically embed personalized QR codes into emails for added interactivity.
 **Customizable Templates**: Use a default email template or import your own HTML templates.
 **Session Continuity**: Save and reuse configurations from previous campaigns.
