@@ -9,7 +9,6 @@ setup(
         "qrcode",  # For generating QR codes
         "pillow",  # For image handling
         "requests",  # For making HTTP requests
-        "smtplib",  # Handles sending emails (part of the standard library)
     ],
     entry_points={
         "console_scripts": [
