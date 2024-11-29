@@ -46,6 +46,34 @@ def send_email(smtp_host, smtp_user, smtp_pass, smtp_sender_email, recipient, su
     except smtplib.SMTPException as e:
         return False, f"Error sending email to {recipient}: {str(e)}"
 
+def verify_smtp_credentials():
+    while True:
+        try:
+            # Prompt the user for SMTP details
+            smtp_host = input("Enter SMTP Host: ").strip()
+            smtp_user = input("Enter SMTP Username: ").strip()
+            smtp_pass = input("Enter SMTP Password: ").strip()
+
+            print("\nVerifying SMTP credentials...")
+            server = smtplib.SMTP(smtp_host, 587)
+            server.starttls()  # Start encrypted connection
+            server.login(smtp_user, smtp_pass)
+            server.quit()
+
+            print("[OK] SMTP credentials are valid.")
+            return smtp_host, smtp_user, smtp_pass  # Return valid credentials
+        except smtplib.SMTPAuthenticationError:
+            print("[FAILED] Authentication failed. Please check your username and password.")
+        except smtplib.SMTPConnectError:
+            print("[FAILED] Unable to connect to the SMTP server. Please check the host address.")
+        except Exception as e:
+            print(f"[FAILED] An error occurred: {str(e)}")
+
+        retry = input("Retry entering SMTP details? (y/n): ").strip().lower()
+        if retry != 'y':
+            print("SMTP setup aborted by the user.")
+            return None, None, None  # Exit the process if the user does not want to retry
+
 # Process emails
 def process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_list, subject, body, url):
     # Generate the QR code for the phishing URL
@@ -78,38 +106,56 @@ def process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_lis
 
 # Main function
 def main():
-    display_info()
-    result = manage_session()
-    if not result:
-        print("++++++++++ No Previous sessions ++++++++++\n")
-        return  # Exit if no configuration was provided
+    while True:  # Loop to allow restarting campaigns
+        display_info()
 
-    # Unpack session details
-    smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body = result
+        result = None  # Initialize result to None
+        while not result:  # Keep trying to get a valid session
+            result = manage_session()  # Try to load the session or get a new configuration
 
-    # Prompt for the email list file
-    email_list_file = input("Email list file (CSV/TXT): ").strip()
-    email_list = load_email_list(email_list_file)
+            if not result:  # If no valid session is found
+                print("++++++++++ No Previous sessions ++++++++++")
+                retry = input("\nDo you want to configure a new session? (y/n): ").strip().lower()
+                if retry != 'y':  # If the user doesn't want to configure a new session
+                    print("Exiting program. Goodbye!")
+                    return  # Exit the program gracefully
 
-    if not email_list:
-        print("No valid emails found. Campaign aborted.")
-        return
+        # Unpack session details
+        smtp_host, smtp_user, smtp_pass, smtp_sender_email, subject, url, body = result
 
-    # Confirm campaign details
-    if not confirm_campaign(smtp_host, smtp_user, smtp_sender_email, subject, url, len(email_list)):
-        print("Campaign canceled by the user.")
-        return
+        # Verify SMTP credentials or restart if invalid
+        while True:
+            smtp_host, smtp_user, smtp_pass = verify_smtp_credentials()
+            if smtp_host and smtp_user and smtp_pass:
+                break  # Continue if valid credentials are entered
+            else:
+                print("Retrying SMTP credentials input.")
+                continue  # Retry entering SMTP credentials if invalid
 
-    # Start campaign
-    print("\n++++++++ Starting Campaign ++++++++")
-    process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_list, subject, body, url)
+        # Prompt for the email list file
+        email_list_file = input("Email list file (CSV/TXT): ").strip()
+        email_list = load_email_list(email_list_file)
 
-    # Check if the user wants to run another campaign
-    another = input("\nDo you want to run another campaign? (y/n): ").strip().lower()
-    print("*************************************************\n")
-    if another != 'y':
-        print("Exiting BarMailer0.1 Goodbye!")
+        if not email_list:
+            print("No valid emails found. Campaign aborted.")
+            continue  # Restart the process if no emails are found
+
+        # Confirm campaign details
+        if not confirm_campaign(smtp_host, smtp_user, smtp_sender_email, subject, url, len(email_list)):
+            print("Campaign canceled by the user.")
+            continue  # Restart the process if the user cancels the campaign
+
+        # Start campaign
+        print("\n++++++++ Starting Campaign ++++++++")
+        process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_list, subject, body, url)
+
+        # Ask the user if they want to run another campaign
+        another = input("\nDo you want to run another campaign? (y/n): ").strip().lower()
         print("*************************************************\n")
+        if another != 'y':
+            print("Exiting BarMailer0.1 Goodbye!")
+            print("*************************************************\n")
+            break  # Exit the loop if the user doesn't want to run another campaign
 
 # Run the main function when the script is executed
 if __name__ == "__main__":
