@@ -2,9 +2,13 @@ import smtplib
 import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from utils import manage_session, generate_qr_code_base64, load_email_list, generate_email_body
+import requests  # To handle the Imgur API upload
+from utils import manage_session, load_email_list, generate_email_body, generate_qr_code_file, upload_qr_code_to_imgur
 
 VERSION = "0.1.0"
+
+# Imgur API configuration
+IMGUR_CLIENT_ID = 'a607b86c0481968'  # Replace with your Imgur client ID
 
 # Display script details
 def display_info():
@@ -49,17 +53,25 @@ def verify_smtp_credentials(smtp_host, smtp_user, smtp_pass):
 
 # Process emails
 def process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_list, subject, body, url):
-    qr_code_data = generate_qr_code_base64(url)
-    if not qr_code_data:
+    # Here you would generate the QR code locally, save it, and then upload it
+    qr_code_image_path = generate_qr_code_file(url)  # Use the function to generate QR code
+    if not qr_code_image_path:
         print("Error generating QR code.")
         return
-    
-    qr_code_html = f'<img src="data:image/png;base64,{qr_code_data}" alt="QR Code" style="width:150px;height:150px;"/>'
+
+    # Upload to Imgur
+    imgur_url = upload_qr_code_to_imgur(qr_code_image_path)
+    if not imgur_url:
+        print("Error uploading QR code to Imgur.")
+        return
+
+    # Embed the Imgur image URL in the email body
+    qr_code_html = f'<img src="{imgur_url}" alt="QR Code" style="width:150px;height:150px;"/>'
     body_with_qr = body.replace("{{QR_CODE}}", qr_code_html)
 
     for email in email_list:
         email = email.strip()
-        personalized_body = body_with_qr.replace("{{USERNAME}}", email)
+        personalized_body = body_with_qr.replace("{{USERNAME}}", email)  # Replace username placeholder
         success, message = send_email(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email, subject, personalized_body)
         print(f"{'[OK]' if success else '[FAILED]'} {email}: {message}")
         time.sleep(2)
@@ -111,21 +123,10 @@ def main():
             continue
 
         if not confirm_campaign(smtp_host, smtp_user, smtp_sender_email, subject, url, len(email_list)):
-            print("Campaign canceled by the user.")
+            print("Campaign aborted.")
             continue
 
-        print("\n++++++++++++++++ Starting Campaign ++++++++++++++++\n")
         process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_list, subject, body, url)
-        print("\n*************************************************")
 
-        print("\n*************************************************")
-        another = input("\nDo you want to run another campaign? (y/n): ").strip().lower()
-        print("\n*************************************************")
-        if another != 'y':
-            print("Exiting BarMailer0.1 Goodbye!")
-            print("*************************************************\n")
-            break
-
-# Run the main function when the script is executed
 if __name__ == "__main__":
     main()
