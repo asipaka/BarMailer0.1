@@ -28,19 +28,23 @@ def confirm_campaign(smtp_host, smtp_user, smtp_sender_email, subject, url, emai
 # Verify SMTP credentials
 def verify_smtp_credentials(smtp_host, smtp_user, smtp_pass):
     try:
-        print("\nVerifying SMTP credentials...")
+        print("\n*********** Verifying SMTP credentials... ***********")
         server = smtplib.SMTP(smtp_host, 587)
         server.starttls()  # Start encrypted connection
         server.login(smtp_user, smtp_pass)
         server.quit()
         print("[OK] SMTP credentials are valid.")
+        print("\n*************************************************") 
         return True
     except smtplib.SMTPAuthenticationError:
         print("[FAILED] Authentication failed. Please check your username and password.")
+        print("\n*************************************************") 
     except smtplib.SMTPConnectError:
         print("[FAILED] Unable to connect to the SMTP server. Please check the host address.")
+        print("\n*************************************************") 
     except Exception as e:
         print(f"[FAILED] An error occurred: {str(e)}")
+        print("\n*************************************************") 
     return False
 
 # Process emails
@@ -98,7 +102,7 @@ def main():
         if not verify_smtp_credentials(smtp_host, smtp_user, smtp_pass):
             print("Invalid SMTP credentials. Please reconfigure.")
             continue
-
+        print("\n*************************************************")   
         email_list_file = input("Email list file (CSV/TXT): ").strip()
         email_list = load_email_list(email_list_file)
 
@@ -110,9 +114,9 @@ def main():
             print("Campaign canceled by the user.")
             continue
 
-        print("\n++++++++ Starting Campaign ++++++++")
+        print("\n++++++++++++++++ Starting Campaign ++++++++++++++++\n")
         process_emails(smtp_host, smtp_user, smtp_pass, smtp_sender_email, email_list, subject, body, url)
-        print("\n+++++++++++++++++++++++++++++++++++")
+        print("\n*************************************************")
 
         print("\n*************************************************")
         another = input("\nDo you want to run another campaign? (y/n): ").strip().lower()
