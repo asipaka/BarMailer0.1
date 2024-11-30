@@ -28,7 +28,7 @@ def confirm_campaign(smtp_host, smtp_user, smtp_sender_email, subject, url, emai
 # Verify SMTP credentials
 def verify_smtp_credentials(smtp_host, smtp_user, smtp_pass):
     try:
-        print("\n*********** Verifying SMTP credentials... ***********")
+        print("\n*********** Verifying SMTP credentials... ***********\n")
         server = smtplib.SMTP(smtp_host, 587)
         server.starttls()  # Start encrypted connection
         server.login(smtp_user, smtp_pass)
